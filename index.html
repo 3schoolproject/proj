@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>3schooltest — анонимный соцопрос по кибербезопасности</title>
+
+  <style>
+    :root{
+      --bg:#0b1020;
+      --text:#e9efff;
+      --muted:#a9b6e8;
+      --border:rgba(255,255,255,.10);
+      --radius:18px;
+      --shadow:0 18px 60px rgba(0,0,0,.45);
+
+      --neon:#00ff88;
+      --neon2:#00d4ff;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      min-height:100vh;
+      padding:28px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(900px 500px at 10% 10%, rgba(106,168,255,.18), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(123,255,182,.12), transparent 60%),
+        radial-gradient(900px 500px at 50% 90%, rgba(255,106,139,.10), transparent 60%),
+        linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+    }
+
+    .app{width:min(1100px,100%); display:grid; gap:18px}
+
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 18px;
+      border:1px solid var(--border); border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(17,26,51,.9), rgba(15,23,48,.85)); box-shadow:var(--shadow);
+    }
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{
+      width:42px;height:42px;border-radius:14px;
+      background:linear-gradient(135deg, rgba(0,255,136,.65), rgba(0,212,255,.45));
+      box-shadow:0 10px 30px rgba(0,255,136,.15);
+    }
+    .title h1{margin:0;font-size:18px}
+    .title p{margin:2px 0 0;color:var(--muted);font-size:13px}
+    .pill{
+      border:1px solid rgba(0,255,136,.35);
+      padding:8px 12px;
+      border-radius:999px;
+      color:rgba(0,255,136,.9);
+      background:rgba(0,255,136,.05);
+      font-size:13px;
+      text-shadow:0 0 15px rgba(0,255,136,.25);
+    }
+
+    .card{
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(17,26,51,.92), rgba(15,23,48,.88));
+      box-shadow:var(--shadow);
+    }
+    .card-inner{padding:18px}
+
+    .grid2{display:grid; grid-template-columns:1.2fr .8fr; gap:18px}
+    @media(max-width:860px){.grid2{grid-template-columns:1fr}}
+
+    .h2{margin:0 0 8px 0; font-size:18px}
+    .muted{color:var(--muted)}
+    .small{font-size:13px; line-height:1.45}
+    .note{
+      padding:12px;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.18);
+      color:var(--muted);
+      background:rgba(255,255,255,.03);
+      line-height:1.45;
+      margin-top:10px;
+    }
+
+    .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; align-items:center}
+    button{
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+    }
+    button:hover{transform:translateY(-1px); background:rgba(255,255,255,.08)}
+    button.primary{
+      border-color:rgba(0,255,136,.45);
+      background:linear-gradient(135deg, rgba(0,255,136,.16), rgba(0,212,255,.10));
+    }
+    button[disabled]{opacity:.45; cursor:not-allowed; transform:none}
+
+    .progress-wrap{
+      height:10px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      border-radius:999px;
+      overflow:hidden;
+      margin-top:10px
+    }
+    .progress{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg, rgba(0,255,136,.9), rgba(0,212,255,.7));
+      transition:.35s
+    }
+
+    /* ===== SURVEY UI ===== */
+    .question{font-size:18px; margin:6px 0 12px; line-height:1.35}
+    .choices{display:grid; gap:10px}
+    .choice{
+      padding:12px; border-radius:14px; border:1px solid var(--border);
+      background:rgba(255,255,255,.04); cursor:pointer; transition:.2s;
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .choice:hover{transform:translateY(-1px); background:rgba(255,255,255,.07)}
+    .choice .tag{
+      min-width:26px;height:26px;border-radius:9px;background:rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:center;color:var(--muted);
+      font-weight:800;border:1px solid var(--border)
+    }
+    .choice.selected{
+      border-color:rgba(0,255,136,.45);
+      background:rgba(0,255,136,.08);
+    }
+
+    .hidden{display:none!important}
+
+    /* ====== STATS DESIGN ====== */
+    .stats-title{
+      text-align:center;
+      font-size:2.2em;
+      margin:10px 0 18px;
+      text-transform:uppercase;
+      letter-spacing:3px;
+      color:var(--neon);
+      text-shadow:0 0 20px rgba(0,255,136,.45);
+    }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap:18px;
+    }
+
+    .chart-card{
+      background: rgba(26, 31, 58, 0.80);
+      border: 2px solid var(--neon);
+      border-radius: 15px;
+      padding: 18px;
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.18);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .chart-card::before{
+      content:'';
+      position:absolute;
+      inset:-2px;
+      background: linear-gradient(45deg, var(--neon), var(--neon2), #ff00ff, var(--neon));
+      border-radius:15px;
+      opacity:0;
+      z-index:-1;
+      transition: opacity 0.25s ease;
+      animation: borderRotate 3s linear infinite;
+    }
+    .chart-card:hover::before{opacity:0.22}
+    .chart-card:hover{transform:translateY(-3px); box-shadow:0 12px 45px rgba(0,255,136,.28)}
+    @keyframes borderRotate { 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
+
+    .chart-title{
+      font-size:1.05em;
+      margin: 2px 0 12px;
+      text-align:center;
+      color: var(--neon2);
+      font-weight:800;
+      line-height:1.35;
+    }
+
+    .chart-row{
+      display:grid;
+      grid-template-columns: 220px 1fr;
+      gap: 14px;
+      align-items:center;
+    }
+    @media(max-width:520px){
+      .chart-row{grid-template-columns: 1fr; }
+    }
+
+    .pie-wrap{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    .pie-wrap svg{
+      width: 200px;
+      height: 200px;
+      filter: drop-shadow(0 0 12px rgba(0,0,0,.35));
+    }
+
+    .legend{
+      display:grid;
+      gap:8px;
+      font-size: 13px;
+      color: rgba(185, 196, 232, .95);
+    }
+    .leg-item{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      line-height:1.35;
+    }
+    .swatch{
+      width:12px; height:12px; border-radius:4px;
+      margin-top:2px;
+      border:1px solid rgba(255,255,255,.12);
+      flex: 0 0 auto;
+    }
+    .leg-text{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      width:100%;
+    }
+    .leg-label{color: rgba(232,239,255,.95)}
+    .leg-val{color: rgba(185,196,232,.95); white-space:nowrap}
+    .topnote{
+      text-align:center;
+      color: rgba(185, 196, 232, .92);
+      margin: 0 0 16px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .center-text{
+      font-weight:900;
+      fill: rgba(232,239,255,.92);
+      text-shadow:0 0 12px rgba(0,255,136,.25);
+    }
+    .center-sub{
+      font-weight:700;
+      fill: rgba(185, 196, 232, .92);
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+
+  <header>
+    <div class="brand">
+      <div class="logo"></div>
+      <div class="title">
+        <h1>3schooltest — анонимный соцопрос</h1>
+        <p>Кибербезопасность и поведение пользователей в сети</p>
+      </div>
+    </div>
+    <div class="pill" id="headerPill">Готов(а) начать?</div>
+  </header>
+
+  <!-- WELCOME -->
+  <section class="card" id="screenWelcome">
+    <div class="card-inner grid2">
+      <div>
+        <h2 class="h2">Описание</h2>
+        <p class="muted small">
+          Это короткий анонимный опрос о привычках и знаниях в области кибербезопасности.
+          Мы не собираем имена, телефоны и другие личные данные. После завершения вы увидите общую статистику ответов.
+        </p>
+
+        <div class="note">
+          Формат: выбираете вариант ответа → переходите к следующему вопросу. «Правильных» и «неправильных» ответов нет.
+        </div>
+
+        <div class="btns">
+          <button class="primary" id="btnStart">Начать опрос</button>
+          <button id="btnGoStats">Открыть статистику</button>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="h2">Условия</h2>
+        <p class="muted small">
+          • Прохождение допускается один раз для каждого участника.<br/>
+          • Ответы используются только в обобщённом виде (статистика).<br/>
+          • Повторное прохождение блокируется базой данных.
+        </p>
+        <div class="progress-wrap"><div class="progress" id="welcomeProg" style="width:0%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SURVEY -->
+  <section class="card hidden" id="screenQuiz">
+    <div class="card-inner">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div>
+          <div class="muted small" id="qMeta">Вопрос 1 из 6</div>
+          <div class="question" id="qText">…</div>
+        </div>
+        <div style="min-width:240px;flex:1">
+          <div class="muted small" style="display:flex;justify-content:space-between">
+            <span>Прогресс</span><span id="qProgressLabel">0%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress" id="qProgress"></div></div>
+        </div>
+      </div>
+
+      <div class="choices" id="choices"></div>
+
+      <div class="btns">
+        <button class="primary" id="btnNext" disabled>Далее</button>
+        <span class="muted small" id="pickHint">Выберите один вариант ответа, чтобы продолжить.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="card hidden" id="screenStats">
+    <div class="card-inner">
+      <div class="stats-title">🔒 Статистика ответов 🔒</div>
+      <p class="topnote" id="resultLine">Загрузка статистики…</p>
+
+      <div class="stats-grid" id="statsCards"></div>
+
+      <div class="btns" style="justify-content:center; margin-top:18px">
+        <button id="btnBackHome">На главную</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Firebase CDN -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+<script>
+  /* ===== Firebase init ===== */
+  const firebaseConfig = {
+    apiKey: "AIzaSyC8YASgWFP-uOeawkCbT-eQRJJ38QnU5hA",
+    authDomain: "cybersecurity-test-89935.firebaseapp.com",
+    projectId: "cybersecurity-test-89935",
+    storageBucket: "cybersecurity-test-89935.firebasestorage.app",
+    messagingSenderId: "738081122573",
+    appId: "1:738081122573:web:86e74e202eac34a2cb2844"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  const SUBMISSIONS = db.collection("submissions");
+
+  let currentUid = null;
+
+  /* ===== Соцопрос: 6 вопросов ===== */
+  const QUESTIONS = [
+    {
+      q:"Слышали ли вы о фишинге (поддельных сайтах и сообщениях для кражи данных)?",
+      a:[
+        "Да, хорошо понимаю, что это",
+        "Слышал(а), но не до конца понимаю",
+        "Нет, не слышал(а)"
+      ]
+    },
+    {
+      q:"Используете ли вы одинаковые пароли для разных сайтов и приложений?",
+      a:[
+        "Да, часто использую один и тот же пароль",
+        "Иногда, для неважных сайтов",
+        "Нет, стараюсь везде использовать разные пароли",
+        "Затрудняюсь ответить"
+      ]
+    },
+    {
+      q:"Включена ли у вас двухфакторная аутентификация (код по SMS/в приложении) хотя бы на одном аккаунте?",
+      a:[
+        "Да, на большинстве важных аккаунтов",
+        "Да, но только на одном-двух сервисах",
+        "Нет",
+        "Не знаю, что это такое"
+      ]
+    },
+    {
+      q:"Переходили ли вы когда-нибудь по ссылкам из подозрительных сообщений (в мессенджерах, почте, соцсетях)?",
+      a:[
+        "Да, было такое",
+        "Возможно, не обращал(а) внимания",
+        "Нет, стараюсь не переходить",
+        "Затрудняюсь ответить"
+      ]
+    },
+    {
+      q:"Скачивали ли вы файлы или программы с неизвестных сайтов?",
+      a:[
+        "Да, несколько раз",
+        "Было 1–2 раза",
+        "Нет, стараюсь скачивать только с официальных источников",
+        "Не помню"
+      ]
+    },
+    {
+      q:"Сталкивались ли вы с попытками взлома аккаунтов (уведомления о подозрительном входе, смене пароля и т.д.)?",
+      a:[
+        "Да, сталкивался(ась)",
+        "Было что-то подозрительное",
+        "Нет, не сталкивался(ась)",
+        "Затрудняюсь ответить"
+      ]
+    }
+  ];
+
+  /* ===== UI refs ===== */
+  const screenWelcome = document.getElementById("screenWelcome");
+  const screenQuiz = document.getElementById("screenQuiz");
+  const screenStats = document.getElementById("screenStats");
+  const headerPill = document.getElementById("headerPill");
+
+  const btnStart = document.getElementById("btnStart");
+  const btnGoStats = document.getElementById("btnGoStats");
+  const btnBackHome = document.getElementById("btnBackHome");
+
+  const qMeta = document.getElementById("qMeta");
+  const qText = document.getElementById("qText");
+  const choices = document.getElementById("choices");
+
+  const btnNext = document.getElementById("btnNext");
+  const pickHint = document.getElementById("pickHint");
+
+  const qProgress = document.getElementById("qProgress");
+  const qProgressLabel = document.getElementById("qProgressLabel");
+
+  const resultLine = document.getElementById("resultLine");
+  const statsCards = document.getElementById("statsCards");
+
+  /* ===== Helpers ===== */
+  function show(screen){
+    screenWelcome.classList.add("hidden");
+    screenQuiz.classList.add("hidden");
+    screenStats.classList.add("hidden");
+    screen.classList.remove("hidden");
+  }
+  function updateHeader(){
+    if(!screenQuiz.classList.contains("hidden")){
+      headerPill.textContent = `Вопрос ${idx+1}/${QUESTIONS.length}`;
+    } else if(!screenStats.classList.contains("hidden")){
+      headerPill.textContent = "Статистика";
+    } else {
+      headerPill.textContent = "Готов(а) начать?";
+    }
+  }
+  async function ensureAuth(){
+    if(auth.currentUser){
+      currentUid = auth.currentUser.uid;
+      return currentUid;
+    }
+    const res = await auth.signInAnonymously();
+    currentUid = res.user.uid;
+    return currentUid;
+  }
+  async function hasAlreadySubmitted(uid){
+    const doc = await SUBMISSIONS.doc(uid).get();
+    return doc.exists;
+  }
+
+  /* ===== Survey state ===== */
+  let idx = 0;
+  let answers = Array(QUESTIONS.length).fill(null);
+
+  function renderQuestion(){
+    btnNext.disabled = true;
+    pickHint.textContent = "Выберите один вариант ответа, чтобы продолжить.";
+    choices.innerHTML = "";
+
+    const item = QUESTIONS[idx];
+    qMeta.textContent = `Вопрос ${idx+1} из ${QUESTIONS.length}`;
+    qText.textContent = item.q;
+
+    const pct = Math.round((idx / QUESTIONS.length) * 100);
+    qProgress.style.width = pct + "%";
+    qProgressLabel.textContent = pct + "%";
+
+    item.a.forEach((text, i) => {
+      const btn = document.createElement("div");
+      btn.className = "choice";
+      btn.innerHTML = `<div class="tag">${String.fromCharCode(65+i)}</div><div>${text}</div>`;
+      btn.addEventListener("click", () => pick(i));
+      choices.appendChild(btn);
+    });
+
+    // если вдруг уже отвечали (на будущее), подсветим
+    if(answers[idx] !== null){
+      markSelected(answers[idx]);
+      btnNext.disabled = false;
+      pickHint.textContent = "Ответ выбран. Можно продолжать.";
+    }
+
+    updateHeader();
+  }
+
+  function markSelected(choiceIndex){
+    const all = Array.from(document.querySelectorAll(".choice"));
+    all.forEach((el, i) => {
+      el.classList.toggle("selected", i === choiceIndex);
+    });
+  }
+
+  function pick(choiceIndex){
+    answers[idx] = choiceIndex;
+    markSelected(choiceIndex);
+    btnNext.disabled = false;
+    pickHint.textContent = "Ответ выбран. Можно продолжать.";
+  }
+
+  async function submitSurvey(){
+    // документ = submissions/{uid}, создать можно только 1 раз правилами
+    await SUBMISSIONS.doc(currentUid).set({
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      total: QUESTIONS.length,
+      answers // массив индексов
+    });
+  }
+
+  /* ===== PIE CHART (SVG) ===== */
+  const PIE_COLORS = ["#ff3366","#ffaa00","#ff6600","#ff9900","#ff0066","#00d4ff","#7bffb6","#a78bfa"];
+
+  function polarToCartesian(cx, cy, r, angleDeg){
+    const angleRad = (angleDeg - 90) * Math.PI / 180.0;
+    return { x: cx + (r * Math.cos(angleRad)), y: cy + (r * Math.sin(angleRad)) };
+  }
+
+  function describeArc(cx, cy, r, startAngle, endAngle){
+    const start = polarToCartesian(cx, cy, r, endAngle);
+    const end = polarToCartesian(cx, cy, r, startAngle);
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+    return [
+      "M", cx, cy,
+      "L", start.x, start.y,
+      "A", r, r, 0, largeArcFlag, 0, end.x, end.y,
+      "Z"
+    ].join(" ");
+  }
+
+  function buildPieSVG(percentages, centerMainText, centerSubText){
+    // percentages: [{pct, color}]
+    const size = 200;
+    const cx = 100, cy = 100, r = 86;
+
+    let start = 0;
+    const paths = [];
+
+    // если нет данных — один серый круг
+    const hasAny = percentages.some(p => p.pct > 0);
+    if(!hasAny){
+      return `
+        <svg viewBox="0 0 ${size} ${size}">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="rgba(0,255,136,0.10)"></circle>
+          <circle cx="${cx}" cy="${cy}" r="${r-18}" fill="rgba(10,14,39,0.85)"></circle>
+          <text x="${cx}" y="${cy-2}" text-anchor="middle" class="center-text" font-size="20">нет</text>
+          <text x="${cx}" y="${cy+20}" text-anchor="middle" class="center-sub" font-size="12">данных</text>
+        </svg>
+      `;
+    }
+
+    for(const seg of percentages){
+      const angle = (seg.pct / 100) * 360;
+      const end = start + angle;
+      if(seg.pct > 0){
+        const d = describeArc(cx, cy, r, start, end);
+        paths.push(`<path d="${d}" fill="${seg.color}" opacity="0.95"></path>`);
+      }
+      start = end;
+    }
+
+    // внутренняя “дырка” (donut)
+    return `
+      <svg viewBox="0 0 ${size} ${size}">
+        ${paths.join("")}
+        <circle cx="${cx}" cy="${cy}" r="${r-18}" fill="rgba(10,14,39,0.85)"></circle>
+        <text x="${cx}" y="${cy-6}" text-anchor="middle" class="center-text" font-size="22">${centerMainText}</text>
+        <text x="${cx}" y="${cy+18}" text-anchor="middle" class="center-sub" font-size="12">${centerSubText}</text>
+      </svg>
+    `;
+  }
+
+  function buildStatsCard(qIndex, counts, totalAnswers){
+    const q = QUESTIONS[qIndex];
+
+    // считаем проценты по каждому варианту
+    const parts = q.a.map((label, i) => {
+      const c = counts[i] || 0;
+      const pct = totalAnswers ? Math.round((c / totalAnswers) * 100) : 0;
+      return { label, c, pct, color: PIE_COLORS[i % PIE_COLORS.length] };
+    });
+
+    // найдём самый популярный вариант для центра
+    let best = parts[0];
+    for(const p of parts) if(p.c > best.c) best = p;
+    const centerMain = totalAnswers ? `${best.pct}%` : "—";
+    const centerSub = totalAnswers ? "самый частый" : "участников: 0";
+
+    const pie = buildPieSVG(parts.map(p => ({pct: p.pct, color: p.color})), centerMain, centerSub);
+
+    const legend = parts.map(p => `
+      <div class="leg-item">
+        <div class="swatch" style="background:${p.color}"></div>
+        <div class="leg-text">
+          <div class="leg-label">${p.label}</div>
+          <div class="leg-val">${totalAnswers ? `${p.pct}% (${p.c})` : "—"}</div>
+        </div>
+      </div>
+    `).join("");
+
+    const card = document.createElement("div");
+    card.className = "chart-card";
+    card.innerHTML = `
+      <div class="chart-title">${q.q}</div>
+      <div class="chart-row">
+        <div class="pie-wrap">${pie}</div>
+        <div class="legend">${legend}</div>
+      </div>
+    `;
+    return card;
+  }
+
+  /* ===== Global stats: распределение ответов ===== */
+  async function renderGlobalStats(){
+    statsCards.innerHTML = "";
+    resultLine.textContent = "Загрузка статистики…";
+
+    const snap = await SUBMISSIONS.get();
+    const n = QUESTIONS.length;
+
+    // counts[q][option] = count
+    const counts = Array.from({length:n}, (_, qi) => Array(QUESTIONS[qi].a.length).fill(0));
+    let participants = 0;
+
+    snap.forEach(doc => {
+      const d = doc.data();
+      if(!d || !Array.isArray(d.answers)) return;
+      participants += 1;
+
+      for(let qi=0; qi<n; qi++){
+        const ans = d.answers[qi];
+        if(typeof ans === "number" && counts[qi][ans] !== undefined){
+          counts[qi][ans] += 1;
+        }
+      }
+    });
+
+    resultLine.textContent = `Участников: ${participants}. Показано распределение ответов по каждому вопросу (в процентах и числах).`;
+
+    for(let qi=0; qi<n; qi++){
+      statsCards.appendChild(buildStatsCard(qi, counts[qi], participants));
+    }
+  }
+
+  /* ===== Buttons ===== */
+  btnStart.addEventListener("click", async () => {
+    await ensureAuth();
+    if(await hasAlreadySubmitted(currentUid)){
+      alert("Опрос уже пройден. Повторное прохождение отключено.");
+      return;
+    }
+    idx = 0;
+    answers = Array(QUESTIONS.length).fill(null);
+    show(screenQuiz);
+    renderQuestion();
+  });
+
+  btnNext.addEventListener("click", async () => {
+    if(answers[idx] === null) return;
+
+    idx += 1;
+    if(idx >= QUESTIONS.length){
+      await submitSurvey();
+      await renderGlobalStats();
+      show(screenStats);
+      updateHeader();
+    } else {
+      renderQuestion();
+    }
+  });
+
+  btnGoStats.addEventListener("click", async () => {
+    await ensureAuth(); // чтобы read правила работали одинаково
+    await renderGlobalStats();
+    show(screenStats);
+    updateHeader();
+  });
+
+  btnBackHome.addEventListener("click", () => {
+    show(screenWelcome);
+    updateHeader();
+  });
+
+  updateHeader();
+</script>
+</body>
+</html>
